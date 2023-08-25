@@ -1,0 +1,32 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Compile and package
+        run: |
+          mkdir -p artifacts
+          # Replace with your actual compilation commands
+          gcc src/cpuid_check.c -o artifacts/cpuid_check
+          # Add more compilation commands for other files if needed
+          cd artifacts
+          zip -r ChipInspect_${{ matrix.os }}.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChipInspect_${{ matrix.os }}
+          path: artifacts/ChipInspect_${{ matrix.os }}.zip
