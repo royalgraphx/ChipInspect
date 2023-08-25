@@ -6,11 +6,58 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+  build_macos:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup environment and compile
+        run: |
+          mkdir -p artifacts
+          cd src  # Change to your source code directory
+          gcc cpuid_check.c -o ../artifacts/cpuid_check
+          # Add more compilation commands for other files if needed
+
+      - name: Create artifact
+        run: |
+          cd artifacts
+          zip -r ChipInspect_macOS.zip .
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChipInspect_macOS
+          path: artifacts/ChipInspect_macOS.zip
+
+  build_ubuntu:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup environment and compile
+        run: |
+          mkdir -p artifacts
+          cd src  # Change to your source code directory
+          gcc cpuid_check.c -o ../artifacts/cpuid_check
+          # Add more compilation commands for other files if needed
+
+      - name: Create artifact
+        run: |
+          cd artifacts
+          zip -r ChipInspect_Linux.zip .
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ChipInspect_Linux
+          path: artifacts/ChipInspect_Linux.zip
+
+  build_windows:
+    runs-on: windows-latest
     
     steps:
       - name: Checkout code
@@ -21,26 +68,16 @@ jobs:
         run: |
           mkdir -p artifacts
           cd src  # Change to your source code directory
-          
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            gcc cpuid_check.c -o ../artifacts/cpuid_check.exe
-          else
-            gcc cpuid_check.c -o ../artifacts/cpuid_check
-          fi
+          gcc cpuid_check.c -o ../artifacts/cpuid_check.exe
           # Add more compilation commands for other files if needed
 
       - name: Create artifact
         run: |
           cd artifacts
-          
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            Compress-Archive -Path . -DestinationPath ChipInspect_windows-latest.zip
-          else
-            zip -r ChipInspect_${{ matrix.os }}.zip .
-          fi
-
+          Compress-Archive -Path . -DestinationPath ChipInspect_Win64.zip
+      
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ChipInspect_${{ matrix.os }}
-          path: artifacts/ChipInspect_${{ matrix.os }}.zip
+          name: ChipInspect_Win64
+          path: artifacts/ChipInspect_Win64.zip
