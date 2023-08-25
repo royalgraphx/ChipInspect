@@ -17,11 +17,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup environment and compile
+        shell: bash
         run: |
           mkdir -p artifacts
           cd src  # Change to your source code directory
-          # Replace with your actual compilation commands
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
             gcc cpuid_check.c -o ../artifacts/cpuid_check.exe
           else
             gcc cpuid_check.c -o ../artifacts/cpuid_check
@@ -31,8 +32,9 @@ jobs:
       - name: Create artifact
         run: |
           cd artifacts
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            Compress-Archive -Path * -DestinationPath ChipInspect_windows-latest.zip
+          
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            Compress-Archive -Path . -DestinationPath ChipInspect_windows-latest.zip
           else
             zip -r ChipInspect_${{ matrix.os }}.zip .
           fi
