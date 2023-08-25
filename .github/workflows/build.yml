@@ -15,22 +15,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-      - name: Compile and package
+
+      - name: Setup environment
         run: |
           mkdir -p artifacts
           # Replace with your actual compilation commands
           gcc src/cpuid_check.c -o artifacts/cpuid_check
           # Add more compilation commands for other files if needed
-          cd artifacts
-          
-          if ($env:matrix_os -eq "windows-latest") {
-            Compress-Archive -Path * -DestinationPath ChipInspect_windows-latest.zip
-          }
-          else {
-            zip -r ChipInspect_${env:matrix_os}.zip .
-          }
-      
+
+      - name: Create artifact
+        run: |
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            zip -r ChipInspect_${{ matrix.os }}.zip artifacts
+          else
+            cd artifacts
+            zip -r ChipInspect_${{ matrix.os }}.zip .
+          fi
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
