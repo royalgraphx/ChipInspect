@@ -23,8 +23,13 @@ jobs:
           gcc src/cpuid_check.c -o artifacts/cpuid_check
           # Add more compilation commands for other files if needed
           cd artifacts
-          zip -r ChipInspect_${{ matrix.os }}.zip .
-
+          
+          if [ "$matrix_os" == "windows-latest" ]; then
+            Compress-Archive -Path * -DestinationPath ChipInspect_windows-latest.zip
+          else
+            zip -r ChipInspect_${matrix_os}.zip .
+          fi
+      
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
