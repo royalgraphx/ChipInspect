@@ -20,16 +20,11 @@ jobs:
           gcc cpuid_check.c -o ../artifacts/cpuid_check
           # Add more compilation commands for other files if needed
 
-      - name: Create artifact
-        run: |
-          cd artifacts
-          zip -r ChipInspect_macOS.zip .
-      
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: ChipInspect_macOS
-          path: artifacts/ChipInspect_macOS.zip
+          path: artifacts/cpuid_check
 
   build_ubuntu:
     runs-on: ubuntu-latest
@@ -45,16 +40,11 @@ jobs:
           gcc cpuid_check.c -o ../artifacts/cpuid_check
           # Add more compilation commands for other files if needed
 
-      - name: Create artifact
-        run: |
-          cd artifacts
-          zip -r ChipInspect_Linux.zip .
-      
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: ChipInspect_Linux
-          path: artifacts/ChipInspect_Linux.zip
+          path: artifacts/cpuid_check
 
   build_windows:
     runs-on: windows-latest
@@ -70,14 +60,9 @@ jobs:
           cd src  # Change to your source code directory
           gcc cpuid_check.c -o ../artifacts/cpuid_check.exe
           # Add more compilation commands for other files if needed
-
-      - name: Create artifact
-        run: |
-          cd artifacts
-          Compress-Archive -Path . -DestinationPath ChipInspect_Win64.zip
-      
+          
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: ChipInspect_Win64
-          path: artifacts/ChipInspect_Win64.zip
+          path: artifacts/cpuid_check.exe
