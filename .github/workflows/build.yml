@@ -16,19 +16,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup environment
+      - name: Setup environment and compile
         run: |
           mkdir -p artifacts
+          cd src  # Change to your source code directory
           # Replace with your actual compilation commands
-          gcc src/cpuid_check.c -o artifacts/cpuid_check
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            gcc cpuid_check.c -o ../artifacts/cpuid_check.exe
+          else
+            gcc cpuid_check.c -o ../artifacts/cpuid_check
+          fi
           # Add more compilation commands for other files if needed
 
       - name: Create artifact
         run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          cd artifacts
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             Compress-Archive -Path * -DestinationPath ChipInspect_windows-latest.zip
           else
-            cd artifacts
             zip -r ChipInspect_${{ matrix.os }}.zip .
           fi
 
