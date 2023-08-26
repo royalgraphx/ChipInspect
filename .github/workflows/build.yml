@@ -23,6 +23,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
+          gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check
 
       - name: Upload artifact
@@ -48,6 +49,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
+          gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check
 
       - name: Upload artifact
@@ -74,6 +76,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers.exe
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware.exe
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw.exe
+          gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7.exe
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check.exe
           
       - name: Upload artifact

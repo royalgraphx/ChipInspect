@@ -27,5 +27,4 @@ Temporary Items
 
 # Local Build Directory
 
-build_all.sh
 build/*
