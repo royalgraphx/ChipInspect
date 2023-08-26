@@ -11,7 +11,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup environment and compile
         run: |
@@ -21,7 +21,7 @@ jobs:
           # Add more compilation commands for other files if needed
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_macOS
           path: artifacts/cpuid_check
@@ -31,7 +31,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup environment and compile
         run: |
@@ -41,7 +41,7 @@ jobs:
           # Add more compilation commands for other files if needed
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_Linux
           path: artifacts/cpuid_check
@@ -51,7 +51,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup environment and compile
         shell: bash
@@ -62,7 +62,7 @@ jobs:
           # Add more compilation commands for other files if needed
           
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_Win64
           path: artifacts/cpuid_check.exe
