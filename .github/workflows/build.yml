@@ -65,4 +65,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_Win64
+<<<<<<< HEAD
           path: artifacts/cpuid_check.exe
+=======
+          path: artifacts/cpuid_check.exe
+>>>>>>> 459231ff974dbda9627f76d029c34bcd9e459b7c
