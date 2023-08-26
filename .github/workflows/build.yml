@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_macOS
-          path: artifacts/cpuid_check
+          path: artifacts/*
 
   build_ubuntu:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_Linux
-          path: artifacts/cpuid_check
+          path: artifacts/*
 
   build_windows:
     runs-on: windows-latest
@@ -80,4 +80,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ChipInspect_Win64
-          path: artifacts/cpuid_check.exe
+          path: artifacts/*
