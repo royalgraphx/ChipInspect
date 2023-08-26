@@ -1,6 +1,7 @@
 /*
  * ChipInspect - CPU Identification and Inspection Tool
- * cpuid_check.c - Prints out current CPUID Information and Conversions.
+ * intel_validity_check.c - Prints out current CPUID Vendor ID Information and compares it to GenuineIntel.
+ * BSD 4-Clause "Original" or "Old" License
  * Copyright (c) 2023 RoyalGraphX
  * All rights reserved.
  *
@@ -66,41 +67,6 @@ void binary_to_char(uint32_t value, char *output) {
 int main() {
     uint32_t eax, ebx, ecx, edx;
 
-    // Find the maximum supported EAX value
-    cpuid(0, 0, &eax, &ebx, &ecx, &edx);
-    uint32_t maxEAX = eax;
-
-    printf("Maximum supported EAX value: 0x%08X\n", maxEAX);
-
-    // Iterate through each EAX value and print the registers
-    for (uint32_t currentEAX = 0; currentEAX <= maxEAX; ++currentEAX) {
-        cpuid(currentEAX, 0, &eax, &ebx, &ecx, &edx);
-        
-        printf("CPUID Registers for EAX 0x%08X:\n", currentEAX);
-        printf("EAX: 0x%08X\n", eax);
-        printf("EBX: 0x%08X\n", ebx);
-        printf("ECX: 0x%08X\n", ecx);
-        printf("EDX: 0x%08X\n", edx);
-        printf("\n");
-
-        printf("[EAX] (Bits): ");
-        print_bits(eax, 32);
-        printf("\n");
-
-        printf("[EBX] (Bits): ");
-        print_bits(ebx, 32);
-        printf("\n");
-
-        printf("[ECX] (Bits): ");
-        print_bits(ecx, 32);
-        printf("\n");
-
-        printf("[EDX] (Bits): ");
-        print_bits(edx, 32);
-        printf("\n");
-        printf("\n");
-    }
-
     // Call CPUID with EAX=0 to get vendor ID
     cpuid(0, 0, &eax, &ebx, &ecx, &edx);
 
@@ -110,7 +76,7 @@ int main() {
         edx & 0xFF, (edx >> 8) & 0xFF, (edx >> 16) & 0xFF, (edx >> 24) & 0xFF,
         ecx & 0xFF, (ecx >> 8) & 0xFF, (ecx >> 16) & 0xFF, (ecx >> 24) & 0xFF);
 
-    printf("Registers:\n");
+    printf("Leaf 0 Registers:\n");
     printf("\n");
     printf("EAX: 0x%08X\n", eax);
     printf("EBX: 0x%08X\n", ebx);
@@ -118,24 +84,24 @@ int main() {
     printf("EDX: 0x%08X\n", edx);
     printf("\n");
 
-    printf("Vendor ID (Bits) [EAX]: ");
+    printf("Leaf 0 (Bits) [EAX]: ");
     print_bits(eax, 32);
     printf("\n");
 
-    printf("Vendor ID (Bits) [EBX]: ");
+    printf("Leaf 0 (Bits) [EBX]: ");
     print_bits(ebx, 32);
     printf("\n");
 
-    printf("Vendor ID (Bits) [ECX]: ");
+    printf("Leaf 0 (Bits) [ECX]: ");
     print_bits(ecx, 32);
     printf("\n");
 
-    printf("Vendor ID (Bits) [EDX]: ");
+    printf("Leaf 0 (Bits) [EDX]: ");
     print_bits(edx, 32);
     printf("\n");
     printf("\n");
 
-    printf("VMWare CPUID Vendor ID Information:\n");
+    printf("VMWare Leaf 0 Vendor ID Conversion:\n");
 
     // Convert EAX to binary string
     printf("cpuid.0.eax = \"");
@@ -168,14 +134,14 @@ int main() {
     binary_to_char(ecx, vmware_vendor_id_ecx);
     binary_to_char(edx, vmware_vendor_id_edx);
 
-    printf("Converted VMWare Vendor ID [EAX]: %s\n", vmware_vendor_id_eax);
-    printf("Converted VMWare Vendor ID [EBX]: %s\n", vmware_vendor_id_ebx);
-    printf("Converted VMWare Vendor ID [ECX]: %s\n", vmware_vendor_id_ecx);
-    printf("Converted VMWare Vendor ID [EDX]: %s\n", vmware_vendor_id_edx);
+    printf("Returned VMWare Vendor ID [EAX]: %s\n", vmware_vendor_id_eax);
+    printf("Returned VMWare Vendor ID [EBX]: %s\n", vmware_vendor_id_ebx);
+    printf("Returned VMWare Vendor ID [ECX]: %s\n", vmware_vendor_id_ecx);
+    printf("Returned VMWare Vendor ID [EDX]: %s\n", vmware_vendor_id_edx);
     printf("\n");
 
     // Check if the converted VMWare data matches the original data
-    printf("Comparing converted VMWare data with Intel data:\n");
+    printf("Comparing returned VMWare data with Intel data:\n");
     printf("EAX: %s\n", strcmp(vmware_vendor_id_eax, "") == 0 ? "Match" : "Mismatch [Normal]");
     printf("EBX: %s\n", strcmp(vmware_vendor_id_ebx, "Genu") == 0 ? "Match" : "Mismatch");
     printf("ECX: %s\n", strcmp(vmware_vendor_id_ecx, "ntel") == 0 ? "Match" : "Mismatch");
