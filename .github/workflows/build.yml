@@ -24,7 +24,9 @@ jobs:
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
           gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7
+          gcc gen_leaf_chart.c -o ../artifacts/gen_leaf_chart
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check
+          gcc read_registers.c -o ../artifacts/read_registers
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -50,7 +52,9 @@ jobs:
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
           gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7
+          gcc gen_leaf_chart.c -o ../artifacts/gen_leaf_chart
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check
+          gcc read_registers.c -o ../artifacts/read_registers
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -77,7 +81,9 @@ jobs:
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware.exe
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw.exe
           gcc cpuid_readfeatures_leaf7.c -o ../artifacts/cpuid_readfeatures_leaf7.exe
+          gcc gen_leaf_chart.c -o ../artifacts/gen_leaf_chart.exe
           gcc intel_validity_check.c -o ../artifacts/intel_validity_check.exe
+          gcc read_registers.c -o ../artifacts/read_registers.exe
           
       - name: Upload artifact
         uses: actions/upload-artifact@v3
