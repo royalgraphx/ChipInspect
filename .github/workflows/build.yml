@@ -23,7 +23,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
-          gcc intel_validity_check.c -o -o ../artifacts/intel_validity_check
+          gcc intel_validity_check.c -o ../artifacts/intel_validity_check
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -48,7 +48,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw
-          gcc intel_validity_check.c -o -o ../artifacts/intel_validity_check
+          gcc intel_validity_check.c -o ../artifacts/intel_validity_check
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -74,7 +74,7 @@ jobs:
           gcc cpuid_dump_registers.c -o ../artifacts/cpuid_dump_registers.exe
           gcc cpuid_gen_vmware.c -o ../artifacts/cpuid_gen_vmware.exe
           gcc cpuid_raw.c -o ../artifacts/cpuid_raw.exe
-          gcc intel_validity_check.c -o -o ../artifacts/intel_validity_check.exe
+          gcc intel_validity_check.c -o ../artifacts/intel_validity_check.exe
           
       - name: Upload artifact
         uses: actions/upload-artifact@v3
