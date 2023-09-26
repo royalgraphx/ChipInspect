@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 
 void cpuid(uint32_t func, uint32_t subfunc, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     asm volatile (
@@ -153,11 +154,12 @@ int main() {
     uint64_t concatenated_value = ((uint64_t)edx << 32) | eax;
     uint64_t concatenated_value_high = ((uint64_t)ebx << 32) | ecx;
 
-    printf("Concatenated Value (Lower 64 bits): 0x%016llX\n", concatenated_value);
-    printf("Concatenated Value (Upper 64 bits): 0x%016llX\n", concatenated_value_high);
+    // Use PRIx64 for hexadecimal printing
+    printf("Concatenated Value (Lower 64 bits): 0x%016" PRIx64 "\n", concatenated_value);
+    printf("Concatenated Value (Upper 64 bits): 0x%016" PRIx64 "\n", concatenated_value_high);
     
-    // Display the complete 128-bit string
-    printf("Complete 128-bit Value: 0x%016llX%016llX\n", concatenated_value_high, concatenated_value);
+    // Use PRIx64 for printing concatenated_value_high and PRIu64 for concatenated_value
+    printf("Complete 128-bit Value: 0x%016" PRIx64 "%016" PRIu64 "\n", concatenated_value_high, concatenated_value);
     printf("\n");
 
     return 0;
