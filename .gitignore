@@ -25,6 +25,12 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Local Build Directory
-
+# local directories
+watchdog
+watchdog_src/*
+images/*
+db/*
+mountpoints/*
+.ChipInspVEnv/*
+.legacy/*
 build/*
