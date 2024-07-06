@@ -21,8 +21,8 @@ import subprocess
 from cffi import FFI
 
 # Define various variables
-DEBUG = "FALSE"
-CI_vers = "0.0.9"
+DEBUG = "TRUE"
+CI_vers = "0.0.12"
 ffi = FFI()
 
 # Define the list of leaf values with comments explaining their purpose
@@ -211,6 +211,82 @@ ryzen_leaf_list = [
     0x8000000A,  # SVM Features (AMD-specific)
 ]
 
+# List defining each bit in ECX register from CPUID leaf 1 for Intel platforms
+intel_leaf1__ecx_bits = [
+    (31, "Bit 31: Hypervisor present (always zero on physical CPUs)"),
+    (30, "Bit 30: RDRAND (on-chip random number generator) feature"),
+    (29, "Bit 29: Floating-point conversion instructions to/from FP16 format (F16C)"),
+    (28, "Bit 28: Advanced Vector Extensions (AVX)"),
+    (27, "Bit 27: XSAVE enabled by OS (OSXSAVE)"),
+    (26, "Bit 26: Extensible processor state save/restore (XSAVE, XRSTOR, XSETBV, XGETBV)"),
+    (25, "Bit 25: AES instruction set (AES-NI)"),
+    (24, "Bit 24: APIC implements one-shot operation using a TSC deadline value (TSC-DEADLINE)"),
+    (23, "Bit 23: POPCNT instruction"),
+    (22, "Bit 22: MOVBE instruction (big-endian MOV)"),
+    (21, "Bit 21: x2APIC (enhanced APIC)"),
+    (20, "Bit 20: SSE4.2 instructions"),
+    (19, "Bit 19: SSE4.1 instructions"),
+    (18, "Bit 18: Direct cache access for DMA writes (DCA)"),
+    (17, "Bit 17: Process context identifiers (CR4 Bit 17) (PCID)"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Perfmon & debug capability (PDCM)"),
+    (14, "Bit 14: Can disable sending task priority messages (XTPR)"),
+    (13, "Bit 13: CMPXCHG16B instruction"),
+    (12, "Bit 12: Fused multiply-add (FMA3)"),
+    (11, "Bit 11: Silicon Debug interface (SDBG)"),
+    (10, "Bit 10: L1 Context ID (CNXT-ID)"),
+    (9, "Bit  9: Supplemental SSE3 instructions"),
+    (8, "Bit  8: Thermal Monitor 2 (TM2)"),
+    (7, "Bit  7: Enhanced SpeedStep (EST)"),
+    (6, "Bit  6: Safer Mode Extensions (SMX) (GETSEC instruction)"),
+    (5, "Bit  5: Virtual Machine eXtensions (VMX)"),
+    (4, "Bit  4: CPL qualified debug store (DS-CPL)"),
+    (3, "Bit  3: MONITOR and MWAIT instructions (PNI)"),
+    (2, "Bit  2: 64-bit debug store (DTES64) (EDX Bit 21)"),
+    (1, "Bit  1: PCLMULQDQ (carry-less multiply) instruction"),
+    (0, "Bit  0: SSE3 (Prescott New Instructions - PNI)"),
+]
+
+# List defining each bit in EBX register from CPUID leaf 7 for Intel platforms
+intel_leaf7_ebx_bits = [
+    (31, "Bit 31: AVX512 Vector Length (VL) Extensions"),
+    (30, "Bit 30: AVX512 Byte and Word (BW) Instructions"),
+    (29, "Bit 29: SHA-1 and SHA-256 Extensions"),
+    (28, "Bit 28: AVX-512 Conflict Detection (CD) Instructions"),
+    (27, "Bit 27: AVX-512 Exponential and Reciprocal (ER) Instructions"),
+    (26, "Bit 26: AVX-512 Prefetch (PF) Instructions"),
+    (25, "Bit 25: Intel Processor Trace (IPT)"),
+    (24, "Bit 24: Cache line writeback (CLWB)"),
+    (23, "Bit 23: CLFLUSHOPT instruction"),
+    (22, "Bit 22: PCOMMIT instruction"),
+    (21, "Bit 21: AVX-512 Integer Fused Multiply-Add (IFMA) Instructions"),
+    (20, "Bit 20: Supervisor Mode Access Prevention (SMAP)"),
+    (19, "Bit 19: Intel ADX (Multi-Precision Add-Carry Instruction Extensions)"),
+    (18, "Bit 18: RDSEED - Supports RDSEED instruction"),
+    (17, "Bit 17: AVX-512 Doubleword and Quadword (DQ) Instructions"),
+    (16, "Bit 16: AVX-512 Foundation Instructions"),
+    (15, "Bit 15: Intel Resource Director (RDT) Allocation"),
+    (14, "Bit 14: Intel Memory Protection Extensions (MPX)"),
+    (13, "Bit 13: x87 FPU CS and DS Instructions"),
+    (12, "Bit 12: Intel Resource Director (RDT) Monitoring"),
+    (11, "Bit 11: Restricted Transactional Memory"),
+    (10, "Bit 10: INVPCID instruction"),
+    (9, "Bit  9: Enhanced REP MOVSB/STOSB (ERMS)"),
+    (8, "Bit  8: Bit Manipulation Instruction Set 2 (BMI2)"),
+    (7, "Bit  7: Supervisor Mode Execution Protection (SMEP)"),
+    (6, "Bit  6: FDP exception only (FDP_EXCPTN_ONLY) feature"),
+    (5, "Bit  5: Advanced Vector Extensions 2 (AVX2)"),
+    (4, "Bit  4: Hardware Lock Elision (HLE)"),
+    (3, "Bit  3: Bit Manipulation Instruction Set 1 (BMI1)"),
+    (2, "Bit  2: Intel Software Guard Extensions (SGX)"),
+    (1, "Bit  1: IA32_TSC_ADJUST MSR"),
+    (0, "Bit  0: FSGSBASE instructions"),
+]
+
+# List defining each bit in E register from CPUID leaf  for Intel platforms
+intel_leaf_ex_bits = [
+]
+
 # Ensure GCC is used
 os.environ['CC'] = 'gcc'
 
@@ -335,16 +411,50 @@ def print_subleaf(subleaf):
     
     return colored_subleaf
 
+#def binary_to_char(value):
+#    """Converts a 32-bit integer into a 4-character string."""
+#    output = ""
+#    for i in range(4):
+#        byte = (value >> (8 * i)) & 0xFF
+#        output += chr(byte)
+#    return output
+
 def binary_to_char(value):
-    """Converts a 32-bit integer into a 4-character string."""
-    output = ""
+    chars = []
     for i in range(4):
-        byte = (value >> (8 * i)) & 0xFF
-        output += chr(byte)
-    return output
+        byte = (value >> (i * 8)) & 0xFF
+        if 32 <= byte <= 126:  # Printable ASCII range
+            chars.append(chr(byte))
+        else:
+            chars.append('.')
+    return ''.join(chars)  # Return in normal order, not reversed
 
 def hex_to_char(hex_value):
-    """Converts a hexadecimal string to a 4-character ASCII string."""
+        """Converts a hexadecimal string to a 4-character ASCII string."""
+        if hex_value.startswith("0x"):
+            hex_value = hex_value[2:]
+        # Ensure the length is even
+        hex_value = hex_value.zfill((len(hex_value) + 1) // 2 * 2)
+        
+        # Convert pairs of hex digits to characters and reverse the order
+        chars = []
+        for i in range(0, len(hex_value), 2):
+            byte = int(hex_value[i:i+2], 16)
+            if 32 <= byte <= 126:  # Printable ASCII range
+                chars.append(chr(byte))
+            else:
+                chars.append('.')
+        
+        return ''.join(reversed(chars))
+
+def hex_to_binary(hex_value):
+    # Remove "0x" prefix if present and convert to binary string
+    if hex_value.startswith("0x"):
+        hex_value = hex_value[2:]
+    return bin(int(hex_value, 16))[2:].zfill(32)
+
+def int_hex_to_char(hex_value):
+    """Converts an integer hexadecimal string to a 4-character ASCII string."""
     # Convert hexadecimal string to integer
     int_value = int(hex_value, 16)
     
@@ -423,6 +533,29 @@ def process_leaves_bits():
                 print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - EBX: {print_bits(ebx, 32)}")
                 print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - ECX: {print_bits(ecx, 32)}")
                 print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - {click.style('EDX', bold=True, fg='yellow')}: {print_bits(edx, 32)}")
+
+def process_leaves_ascii():
+    for leaf in leaf_list:
+        max_subleaf = probe_max_subleaf(leaf)
+        for subleaf in range(max_subleaf + 1):
+            eax, ebx, ecx, edx = call_cpuid(leaf, subleaf)
+            
+            if DEBUG.upper() == "TRUE":
+                # Print the ASCII representation for each register in a debug style layout.
+                print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)}")
+                print("call_cpuid function returned:")
+                print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}")
+                print(f"EAX ASCII: {binary_to_char(eax)}")
+                print(f"EBX ASCII: {binary_to_char(ebx)}")
+                print(f"ECX ASCII: {binary_to_char(ecx)}")
+                print(f"EDX ASCII: {binary_to_char(edx)}")
+                print()
+            else:
+                # Print each register's ASCII representation with the desired format for end-users
+                print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - {click.style('EAX', bold=True, fg='yellow')}: {binary_to_char(eax)}")
+                print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - EBX: {binary_to_char(ebx)}")
+                print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - ECX: {binary_to_char(ecx)}")
+                print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - {click.style('EDX', bold=True, fg='yellow')}: {binary_to_char(edx)}")
 
 def generate_raw_table():
     print("CPUID Raw Table:")
@@ -597,6 +730,21 @@ def get_last_directory_name(path):
     """
     return os.path.basename(os.path.normpath(path))
 
+def colored_binary_value(binary_string, bit_index):
+    """Returns a colored version of the binary string with specific bit highlighted."""
+    colored_binary = ""
+    for i, bit in enumerate(binary_string):
+        if i == bit_index:
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_binary += click.style(bit, fg='red')
+            else:
+                colored_binary += click.style(bit, fg='green', bold=True)
+        else:
+            # All other bits are white
+            colored_binary += click.style(bit, fg='bright_black')
+    return colored_binary
+
 def clear_console_deeply():
     """Clears the console deeply by using ANSI escape sequences."""
     # ANSI escape sequence to clear the screen and move cursor to the top left
@@ -612,14 +760,16 @@ def main():
         click.echo(f"Python {get_system_architecture()} Pre-Release {CI_vers} for {host_os_pretty()}\n")
         click.echo("What would you like to do?")
         click.echo("1. Inspect a Leaf and Subleaf")
-        click.echo("2. Inspect a Register or 32-Bit Value")
-        click.echo("3. Inspect a 4 Value Register based Leaf")
-        click.echo("4. Inspect a 4 Value 32-Bit based Leaf")
+        click.echo("2. Inspect a Register or 32 Bit Value")
+        click.echo("3. Inspect a Register based Leaf")
+        click.echo("4. Inspect a 32 Bit based Leaf")
         click.echo("5. Dump CPU Registers")
         click.echo("6. Dump CPU Leafs in Bits")
         click.echo("7. Dump CPU Register Table")
-        click.echo("8. Check AVX2 Support")
-        click.echo("9. Exit")
+        click.echo("8. Dump CPU Leafs in ASCII")
+        click.echo("9. Dump Intel Leaf 1 Information")
+        click.echo("10. Dump Intel Leaf 7 Information")
+        click.echo("11. Exit")
 
         choice = click.prompt("Enter your choice", type=int)
 
@@ -638,8 +788,12 @@ def main():
         elif choice == 7:
             dump_cpu_register_table()
         elif choice == 8:
-            check_avx2_support()
+            dump_cpu_ascii()
         elif choice == 9:
+            inspect_leaf1_intel_support()
+        elif choice == 10:
+            inspect_leaf7_intel_support()
+        elif choice == 11:
             exit_program()
         else:
             click.echo("Invalid choice. Please enter a valid option.")
@@ -763,16 +917,19 @@ def inspect_reg_bit_data():
         # Check if it's a register value (hexadecimal) or bit data (binary)
         if len(input_value) <= 8 and all(char in "0123456789ABCDEFabcdef" for char in input_value):
             # Assume it's a register value (hexadecimal)
+            # Convert hexadecimal values to acsii
             register_value = int(input_value, 16)
             print(f"Integer Value: {register_value}")
             print(f"Register Value (Hex): 0x{register_value:X}")
+            print(f"ASCII Representation: {hex_to_char(input_value)}")
             print(f"Binary Representation: {register_value:032b}")
         elif len(input_value) == 32 and all(char in "01" for char in input_value):
             # Assume it's bit data (binary)
             bit_data = int(input_value, 2)
             print(f"Integer Value: {bit_data}")
-            print(f"Bit Data (Binary): {input_value}")
             print(f"Hexadecimal Representation: 0x{bit_data:X}")
+            print(f"ASCII Representation: {binary_to_char(bit_data)}")
+            print(f"Binary Representation: {input_value}")
         else:
             print("Invalid input format. Please enter either a hexadecimal register value or binary bit data.")
             continue
@@ -789,23 +946,6 @@ def inspect_reg_bit_data():
 
 def inspect_register_leaf():
     click.clear()
-
-    def hex_to_binary(hex_value):
-        # Remove "0x" prefix if present and convert to binary string
-        if hex_value.startswith("0x"):
-            hex_value = hex_value[2:]
-        return bin(int(hex_value, 16))[2:].zfill(32)
-
-    def hex_to_char(hex_value):
-        """Converts a hexadecimal string to a 4-character ASCII string."""
-        if hex_value.startswith("0x"):
-            hex_value = hex_value[2:]
-        # Ensure the length is even
-        hex_value = hex_value.zfill((len(hex_value) + 1) // 2 * 2)
-        
-        # Convert pairs of hex digits to characters and reverse the order
-        chars = [chr(int(hex_value[i:i+2], 16)) for i in range(0, len(hex_value), 2)]
-        return ''.join(reversed(chars))
 
     if DEBUG.upper() == "TRUE":
         click.echo("If you see this message, you're in DEBUG mode...")
@@ -914,17 +1054,6 @@ def inspect_bit_leaf():
         hex_value = hex(int(binary_value, 2))
         return hex_value[2:].upper().zfill(8)  # Remove '0x' prefix and zero-pad to 8 characters
 
-    def hex_to_char(hex_value):
-        """Converts a hexadecimal string to a 4-character ASCII string."""
-        if hex_value.startswith("0x"):
-            hex_value = hex_value[2:]
-        # Ensure the length is even
-        hex_value = hex_value.zfill((len(hex_value) + 1) // 2 * 2)
-        
-        # Convert pairs of hex digits to characters and reverse the order
-        chars = [chr(int(hex_value[i:i+2], 16)) for i in range(0, len(hex_value), 2)]
-        return ''.join(reversed(chars))
-
     if DEBUG.upper() == "TRUE":
         click.echo("If you see this message, you're in DEBUG mode...")
 
@@ -1027,6 +1156,26 @@ def dump_cpu_register_table():
 
     generate_raw_table()
 
+def dump_cpu_register_table():
+    click.clear()
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    generate_raw_table()
+
+def dump_cpu_ascii():
+    click.clear()
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    process_leaves_ascii()
+
 def check_avx2_support():
     click.clear()
 
@@ -1072,6 +1221,133 @@ def check_avx2_support():
         click.echo("AVX2 is not supported on this CPU.")
     
     print()
+
+def inspect_leaf1_intel_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+
+    # Query CPUID leaf 1, subleaf 0
+    eax, ebx, ecx, edx = call_cpuid(1, 0)
+    if DEBUG.upper() == "TRUE":
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 1 sub-leaf 0 Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert ECX to binary string
+    ecx_binary = f"{ecx:032b}"
+
+    colored_ecx_bits = color_bits(ecx_binary)
+    
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        click.echo()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 1, Sub-leaf 0 ECX Bits:")
+    for bit_index, description in intel_leaf1__ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+def inspect_leaf7_intel_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+
+    # Query CPUID leaf 7, subleaf 0
+    eax, ebx, ecx, edx = call_cpuid(7, 0)
+    if DEBUG.upper() == "TRUE":
+        click.echo("call_cpuid function returned:")
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print EBX in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 7 sub-leaf 0 Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert EBX to binary string
+    ebx_binary = f"{ebx:032b}"
+
+    colored_ebx_bits = color_bits(ebx_binary)
+    
+    # Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        click.echo()
+
+    # Step through each bit in ebx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 7, Sub-leaf 0 EBX Bits:")
+    for bit_index, description in intel_leaf7_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
 
 def exit_program():
     click.echo("Exiting ChipInspect. Goodbye!")
