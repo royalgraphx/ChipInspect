@@ -22,7 +22,7 @@ from cffi import FFI
 
 # Define various variables
 DEBUG = "TRUE"
-CI_vers = "0.0.12"
+CI_vers = "0.0.16"
 ffi = FFI()
 
 # Define the list of leaf values with comments explaining their purpose
@@ -247,6 +247,42 @@ intel_leaf1__ecx_bits = [
     (0, "Bit  0: SSE3 (Prescott New Instructions - PNI)"),
 ]
 
+# List defining each bit in EDX register from CPUID leaf 1 for Intel platforms
+intel_leaf1__edx_bits = [
+    (31, "Bit 31: Pending break enable (PBE)"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Thermal monitor (TM)"),
+    (28, "Bit 28: HyperThreading / max APIC IDs field is valid (HTT)"),
+    (27, "Bit 27: Self Snoop (SS)"),
+    (26, "Bit 26: SSE2"),
+    (25, "Bit 25: SSE"),
+    (24, "Bit 24: FXSAVE/FXSTOR instructions (FXSR)"),
+    (23, "Bit 23: MMX"),
+    (22, "Bit 22: ACPI"),
+    (21, "Bit 21: Debug store (DS)"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: CLFLUSH support (CLFSH)"),
+    (18, "Bit 18: Processor serial number (PSN)"),
+    (17, "Bit 17: 32-bit page size extension (PSE36)"),
+    (16, "Bit 16: Page attribute table (PAT)"),
+    (15, "Bit 15: Conditional move instructions (CMOV)"),
+    (14, "Bit 14: Machine check architecture (MCA)"),
+    (13, "Bit 13: Page global bit (PGE)"),
+    (12, "Bit 12: Memory type range registers (MTRR)"),
+    (11, "Bit 11: SYSENTER/SYSEXIT instructions (SEP)"),
+    (10, "Bit 10: Reserved"),
+    (9, "Bit  9: APIC on chip (APIC)"),
+    (8, "Bit  8: CMPXCHG8B (CX8)"),
+    (7, "Bit  7: Machine check exception (MCE)"),
+    (6, "Bit  6: Physical address extension (PAE)"),
+    (5, "Bit  5: Model specific registers (MSR)"),
+    (4, "Bit  4: Time stamp counter (TSC)"),
+    (3, "Bit  3: Page size extension (PSE)"),
+    (2, "Bit  2: Debugging extensions (DE)"),
+    (1, "Bit  1: Virtual 8086 mode enhancements (VME)"),
+    (0, "Bit  0: x87 FPU on chip (FPU)"),
+]
+
 # List defining each bit in EBX register from CPUID leaf 7 for Intel platforms
 intel_leaf7_ebx_bits = [
     (31, "Bit 31: AVX512 Vector Length (VL) Extensions"),
@@ -283,8 +319,112 @@ intel_leaf7_ebx_bits = [
     (0, "Bit  0: FSGSBASE instructions"),
 ]
 
-# List defining each bit in E register from CPUID leaf  for Intel platforms
-intel_leaf_ex_bits = [
+# List defining each bit in ECX register from CPUID leaf 7 for Intel platforms
+intel_leaf7_ecx_bits = [
+    (31, "Bit 31: Protection keys for supervisor-mode pages (PKS)"),
+    (30, "Bit 30: SGX launch configuration"),
+    (29, "Bit 29: Enqueue stores (ENQCMD)"),
+    (28, "Bit 28: 64-bit direct stores (MOVDIRI64B)"),
+    (27, "Bit 27: 32-bit direct stores (MOVDIRI)"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Cache line demote (CLDEMOTE)"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Key locker (KL)"),
+    (22, "Bit 22: Read processor ID (RDPID)"),
+    (21, "Bit 21: Value of MAWAU used by BNDLDX and BNDSTX instructions in 64-bit mode"),
+    (20, "Bit 20: Value of MAWAU used by BNDLDX and BNDSTX instructions in 64-bit mode"),
+    (19, "Bit 19: Value of MAWAU used by BNDLDX and BNDSTX instructions in 64-bit mode"),
+    (18, "Bit 18: Value of MAWAU used by BNDLDX and BNDSTX instructions in 64-bit mode"),
+    (17, "Bit 17: Value of MAWAU used by BNDLDX and BNDSTX instructions in 64-bit mode"),
+    (16, "Bit 16: 5-level paging (LA57)"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: AVX512 VPOPCNTDQ"),
+    (13, "Bit 13: Total memory encryption (TME) enable"),
+    (12, "Bit 12: AVX512 bitwise algorithms (AVX512BITALG)"),
+    (11, "Bit 11: AVX512 vector neural network instructions (AVX512VNNI)"),
+    (10, "Bit 10: VEX-encoded PCLMUL (VPCL)"),
+    (9,  "Bit  9: VEX-encoded AES-NI (VAES)"),
+    (8,  "Bit  8: Galois field NI / Galois field affine transformation (GFNI)"),
+    (7,  "Bit  7: CET shadow stack (CET SS)"),
+    (6,  "Bit  6: AVX512 VBMI2"),
+    (5,  "Bit  5: Wait and pause enhancements (WAITPKG)"),
+    (4,  "Bit  4: OS support enabled for protection keys (OSPKE)"),
+    (3,  "Bit  3: Supports protection keys for user-mode pages (PKU)"),
+    (2,  "Bit  2: User-mode instruction prevention (UMIP)"),
+    (1,  "Bit  1: AVX512 vector byte manipulation instructions (AVX512VBMI)"),
+    (0,  "Bit  0: PREFETCHWT1"),
+]
+
+# List defining each bit in EDX register from CPUID leaf 7 for Intel platforms
+intel_leaf7_edx_bits = [
+    (31, "Bit 31: Speculative store bypass disable (SSBD)"),
+    (30, "Bit 30: IA32_CORE_CAPABILITIES MSR available"),
+    (29, "Bit 29: IA32_ARCH_CAPABILITIES MSR available"),
+    (28, "Bit 28: L1 data cache (L1D) flush"),
+    (27, "Bit 27: Single thread indirect branch predictors (STIBP)"),
+    (26, "Bit 26: Speculation control (IBRS and IPBP)"),
+    (25, "Bit 25: Tile computation on 8-bit integers (AMX-INT8)"),
+    (24, "Bit 24: Tile architecture (AMX-TILE)"),
+    (23, "Bit 23: AVX512 FP16"),
+    (22, "Bit 22: Tile computation on bfloat16 (AMX-BF16)"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: CET indirect branch tracking (CET IBT)"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Platform configuration instruction (PCONFIG)"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: TSX suspend load address tracking"),
+    (15, "Bit 15: Hybrid architecture"),
+    (14, "Bit 14: SERIALIZE instruction"),
+    (13, "Bit 13: TSX force abort MSR available"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Microarchitectural data sampling mitigation (MD_CLEAR)"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: AVX512 VP2INTERSECT dword/qword intersection instructions"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: User interrupts (UINTR)"),
+    (4,  "Bit  4: Fast short REP MOV"),
+    (3,  "Bit  3: AVX512 4FMAPS 4-iteration fused multiply-add"),
+    (2,  "Bit  2: AVX512 4VNNIW 4-iteration dot product with accumulation"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in ECX register from CPUID leaf 0x80000001 for AMD platforms
+amd_leaf80000001_ecx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Breakpoint Addressing Masking (AddrMaskExt)"),
+    (29, "Bit 29: MWAITX and MONITORX capability (MONITORX)"),
+    (28, "Bit 28: L3 Performance Counter Extensions (PerfCtrExtLLC)"),
+    (27, "Bit 27: Performance Time-Stamp Counter (PerfTsc)"),
+    (26, "Bit 26: Data Breakpoint Extension (DataBkptExt)"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: NB performance counter extensions support (PerfCtrExtNB)"),
+    (23, "Bit 23: Processor performance counter extensions (PerfCtrExtCore)"),
+    (22, "Bit 22: Topology extensions support"),
+    (21, "Bit 21: Trailing bit manipulation instruction support (TBM)"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Translation Cache Extension support (TCE)"),
+    (16, "Bit 16: Four-operand FMA instruction support (FMA4)"),
+    (15, "Bit 15: Lightweight profiling support (LWP)"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Watchdog Timer support"),
+    (12, "Bit 12: SKINIT and STGI are support (SKINIT)"),
+    (11, "Bit 11: Extended operation support (XOP)"),
+    (10, "Bit 10: Instruction based sampling (IBS)"),
+    (9, "Bit  9: OS visible workaround (OSVW)"),
+    (8, "Bit  8: PREFETCH and PREFETCHW instructions (3DNowPrefetch)"),
+    (7, "Bit  7: Misaligned SSE mode support (MisAlignSse)"),
+    (6, "Bit  6: EXTRQ, INSERTQ, MOVNTSS, and MOVNTSD instructions (SSE4A)"),
+    (5, "Bit  5: LZCNT instruction support (ABM)"),
+    (4, "Bit  4: LOCK MOV CR0 means MOV CR8 (AltMovCr8)"),
+    (3, "Bit  3: Extended APIC space (ExtApicSpace)"),
+    (2, "Bit  2: Secure Virtual Mode feature (SVM)"),
+    (1, "Bit  1: Core multi-processing legacy mode (CmpLegacy)"),
+    (0, "Bit  0: LAHF and SAHF instructions in 64-bit mode (LahfSahf)"),
 ]
 
 # Ensure GCC is used
@@ -769,7 +909,8 @@ def main():
         click.echo("8. Dump CPU Leafs in ASCII")
         click.echo("9. Dump Intel Leaf 1 Information")
         click.echo("10. Dump Intel Leaf 7 Information")
-        click.echo("11. Exit")
+        click.echo("11. Dump AMD Leaf 80000001 Information")
+        click.echo("12. Exit")
 
         choice = click.prompt("Enter your choice", type=int)
 
@@ -794,6 +935,8 @@ def main():
         elif choice == 10:
             inspect_leaf7_intel_support()
         elif choice == 11:
+            inspect_leaf80000001_amd_support()
+        elif choice == 12:
             exit_program()
         else:
             click.echo("Invalid choice. Please enter a valid option.")
@@ -1262,16 +1405,18 @@ def inspect_leaf1_intel_support():
         click.echo(f"ECX: 0x{ecx:08X}")
         click.echo(f"EDX: 0x{edx:08X}\n")
 
-    # Convert ECX to binary string
+    # Convert ECX and EDX to binary strings
     ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
 
     colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
     
     # Print ECX in binary format
     if DEBUG.upper() == "TRUE":
         click.echo("ECX in binary:")
         print(colored_ecx_bits)
-        click.echo()
+        print()
 
     # Step through each bit in ecx_binary and list its meaning
     click.echo("Intel CPUID Leaf 1, Sub-leaf 0 ECX Bits:")
@@ -1284,6 +1429,22 @@ def inspect_leaf1_intel_support():
         click.echo(f"{colored_value} - {colored_desc}")
 
     click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        print()
+
+    # Step through each bit in edx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 1, Sub-leaf 0 EDX Bits:")
+    for bit_index, description in intel_leaf1__edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
 
 def inspect_leaf7_intel_support():
     click.clear()
@@ -1314,7 +1475,6 @@ def inspect_leaf7_intel_support():
     # Query CPUID leaf 7, subleaf 0
     eax, ebx, ecx, edx = call_cpuid(7, 0)
     if DEBUG.upper() == "TRUE":
-        click.echo("call_cpuid function returned:")
         print("call_cpuid function returned:")
         print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
 
@@ -1328,20 +1488,123 @@ def inspect_leaf7_intel_support():
 
     # Convert EBX to binary string
     ebx_binary = f"{ebx:032b}"
+    ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
 
     colored_ebx_bits = color_bits(ebx_binary)
+    colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
     
     # Print EBX in binary format
     if DEBUG.upper() == "TRUE":
         click.echo("EBX in binary:")
         print(colored_ebx_bits)
-        click.echo()
+        print()
 
     # Step through each bit in ebx_binary and list its meaning
     click.echo("Intel CPUID Leaf 7, Sub-leaf 0 EBX Bits:")
     for bit_index, description in intel_leaf7_ebx_bits:
         bit_value = ebx_binary[31 - bit_index]
         colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        print()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 7, Sub-leaf 0 ECX Bits:")
+    for bit_index, description in intel_leaf7_ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        print()
+
+    # Step through each bit in edx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 7, Sub-leaf 0 EDX Bits:")
+    for bit_index, description in intel_leaf7_edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+def inspect_leaf80000001_amd_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+
+    # Query CPUID leaf 0x80000001, subleaf H
+    eax, ebx, ecx, edx = call_cpuid(0x80000001, 17)
+    if DEBUG.upper() == "TRUE":
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print ECX in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 0x80000001 sub-leaf H Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert ECX to binary string
+    ecx_binary = f"{ecx:032b}"
+
+    colored_ecx_bits = color_bits(ecx_binary)
+    
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        click.echo()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 0x80000001, Sub-leaf H ECX Bits:")
+    for bit_index, description in amd_leaf80000001_ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
         colored_desc = colored_description(description, bit_value)
         #click.echo(f"Value: {colored_value} - {description}")
         #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
