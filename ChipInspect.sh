@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="0.0.1"
+VERSION="0.0.3"
 
 # Define the name of the virtual environment directory
 VENV_DIR=".ChipInspVEnv"
@@ -164,17 +164,6 @@ package_exists() {
     fi
 }
 
-check_nasm() {
-    # Check if qemu-img command exists
-    if command -v nasm >/dev/null 2>&1; then
-        echo "nasm is installed."
-        return 0
-    else
-        echo "nasm is not installed."
-        return 1
-    fi
-}
-
 python_executable() {
     # Determine the appropriate Python executable
     if command -v python3 >/dev/null 2>&1; then
@@ -198,13 +187,6 @@ if [[ "$(uname)" == "Linux" ]]; then
     if [ -f /etc/arch-release ]; then
         # Arch-based Linux commands or tasks
         echo "Running on Arch-based Linux..."
-        
-        # Check and install dosfstools
-        check_mkfs_fat || install_package "dosfstools"
-
-        # Check qemu-nbd and qemu-img
-        check_qemu_nbd || install_package "qemu-img"
-        check_qemu_img || install_package "qemu-img"
 
         check_python_version
 
@@ -239,13 +221,6 @@ if [[ "$(uname)" == "Linux" ]]; then
     elif [ -f /etc/debian_version ]; then
         # Debian-based Linux commands or tasks
         echo "Running on Debian-based Linux..."
-        
-        # Check and install dosfstools
-        check_mkfs_fat || install_package "dosfstools"
-
-        # Check qemu-nbd and qemu-img
-        check_qemu_nbd || install_package "qemu-utils"
-        check_qemu_img || install_package "qemu-utils"
 
         check_python_version
 
@@ -284,12 +259,13 @@ if [[ "$(uname)" == "Linux" ]]; then
         echo "Unsupported Linux distribution."
         exit 1
     fi
+
 elif [[ "$(uname)" == "Darwin" ]]; then
     # macOS-specific commands or tasks
     echo "Running on macOS..."
 
     # Check if Homebrew is installed, required for qemu-img command.
-    check_homebrew
+    # check_homebrew
     
     # Check which python exec to use
     check_python_version
@@ -318,12 +294,6 @@ elif [[ "$(uname)" == "Darwin" ]]; then
     check_requirements_import
     if [ $? -ne 0 ]; then
         install_requirements_pip
-    fi
-    
-    # Check for nasm comand, install via Homebrew if not found
-    if ! check_nasm; then
-        echo "Attempting to install nasm..."
-        install_packages_brew nasm
     fi
 
     # sleep 5

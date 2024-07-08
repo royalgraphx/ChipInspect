@@ -21,8 +21,8 @@ import subprocess
 from cffi import FFI
 
 # Define various variables
-DEBUG = "TRUE"
-CI_vers = "0.0.16"
+DEBUG = "FALSE"
+CI_vers = "0.0.21"
 ffi = FFI()
 
 # Define the list of leaf values with comments explaining their purpose
@@ -211,8 +211,44 @@ ryzen_leaf_list = [
     0x8000000A,  # SVM Features (AMD-specific)
 ]
 
+# List defining each bit in EBX register from CPUID leaf 1 for Intel platforms
+intel_leaf1_ebx_bits = [
+    (31, "Bit 31: Initial APIC value"),
+    (30, "Bit 30: Initial APIC value"),
+    (29, "Bit 29: Initial APIC value"),
+    (28, "Bit 28: Initial APIC value"),
+    (27, "Bit 27: Initial APIC value"),
+    (26, "Bit 26: Initial APIC value"),
+    (25, "Bit 25: Initial APIC value"),
+    (24, "Bit 24: Initial APIC value"),
+    (23, "Bit 23: Logical processors"),
+    (22, "Bit 22: Logical processors"),
+    (21, "Bit 21: Logical processors"),
+    (20, "Bit 20: Logical processors"),
+    (19, "Bit 19: Logical processors"),
+    (18, "Bit 18: Logical processors"),
+    (17, "Bit 17: Logical processors"),
+    (16, "Bit 16: Logical processors"),
+    (15, "Bit 15: CLFLUSH line size"),
+    (14, "Bit 14: CLFLUSH line size"),
+    (13, "Bit 13: CLFLUSH line size"),
+    (12, "Bit 12: CLFLUSH line size"),
+    (11, "Bit 11: CLFLUSH line size"),
+    (10, "Bit 10: CLFLUSH line size"),
+    (9,  "Bit  9: CLFLUSH line size"),
+    (8,  "Bit  8: CLFLUSH line size"),
+    (7,  "Bit  7: Brand index"),
+    (6,  "Bit  6: Brand index"),
+    (5,  "Bit  5: Brand index"),
+    (4,  "Bit  4: Brand index"),
+    (3,  "Bit  3: Brand index"),
+    (2,  "Bit  2: Brand index"),
+    (1,  "Bit  1: Brand index"),
+    (0,  "Bit  0: Brand index"),
+]
+
 # List defining each bit in ECX register from CPUID leaf 1 for Intel platforms
-intel_leaf1__ecx_bits = [
+intel_leaf1_ecx_bits = [
     (31, "Bit 31: Hypervisor present (always zero on physical CPUs)"),
     (30, "Bit 30: RDRAND (on-chip random number generator) feature"),
     (29, "Bit 29: Floating-point conversion instructions to/from FP16 format (F16C)"),
@@ -248,7 +284,7 @@ intel_leaf1__ecx_bits = [
 ]
 
 # List defining each bit in EDX register from CPUID leaf 1 for Intel platforms
-intel_leaf1__edx_bits = [
+intel_leaf1_edx_bits = [
     (31, "Bit 31: Pending break enable (PBE)"),
     (30, "Bit 30: Reserved"),
     (29, "Bit 29: Thermal monitor (TM)"),
@@ -391,6 +427,366 @@ intel_leaf7_edx_bits = [
     (0,  "Bit  0: Reserved"),
 ]
 
+# List defining each bit in EBX register from CPUID leaf 0x80000001 for Intel platforms
+intel_leaf80000001_ebx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in ECX register from CPUID leaf 80000001 for Intel platforms
+intel_leaf80000001_ecx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: PREFETCHW"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: LZCNT"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: LAHF/SAHF available in 64-bit mode"),
+]
+
+# List defining each bit in EDX register from CPUID leaf 80000001 for Intel platforms
+intel_leaf80000001_edx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Intel 64 architecture available (EM64T)"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: RDTSCP and IA32_TSC_AUX available"),
+    (26, "Bit 26: 1GB pages available"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Execute disable bit (NX) available"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: SYSCALL/SYSRET available in 64-bit mode"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in EBX register from CPUID leaf 1 for AMD platforms
+amd_leaf1_ebx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in ECX register from CPUID leaf 1 for AMD platforms
+amd_leaf1_ecx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in EDX register from CPUID leaf 1 for AMD platforms
+amd_leaf1_edx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in EBX register from CPUID leaf 7 for AMD platforms
+amd_leaf7_ebx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in ECX register from CPUID leaf 7 for AMD platforms
+amd_leaf7_ecx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in EDX register from CPUID leaf 7 for AMD platforms
+amd_leaf7_edx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
+# List defining each bit in EBX register from CPUID leaf 0x80000001 for AMD platforms
+amd_leaf80000001_ebx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
+]
+
 # List defining each bit in ECX register from CPUID leaf 0x80000001 for AMD platforms
 amd_leaf80000001_ecx_bits = [
     (31, "Bit 31: Reserved"),
@@ -425,6 +821,42 @@ amd_leaf80000001_ecx_bits = [
     (2, "Bit  2: Secure Virtual Mode feature (SVM)"),
     (1, "Bit  1: Core multi-processing legacy mode (CmpLegacy)"),
     (0, "Bit  0: LAHF and SAHF instructions in 64-bit mode (LahfSahf)"),
+]
+
+# List defining each bit in EDX register from CPUID leaf 0x80000001 for AMD platforms
+amd_leaf80000001_edx_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Reserved"),
+    (26, "Bit 26: Reserved"),
+    (25, "Bit 25: Reserved"),
+    (24, "Bit 24: Reserved"),
+    (23, "Bit 23: Reserved"),
+    (22, "Bit 22: Reserved"),
+    (21, "Bit 21: Reserved"),
+    (20, "Bit 20: Reserved"),
+    (19, "Bit 19: Reserved"),
+    (18, "Bit 18: Reserved"),
+    (17, "Bit 17: Reserved"),
+    (16, "Bit 16: Reserved"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Reserved"),
+    (12, "Bit 12: Reserved"),
+    (11, "Bit 11: Reserved"),
+    (10, "Bit 10: Reserved"),
+    (9,  "Bit  9: Reserved"),
+    (8,  "Bit  8: Reserved"),
+    (7,  "Bit  7: Reserved"),
+    (6,  "Bit  6: Reserved"),
+    (5,  "Bit  5: Reserved"),
+    (4,  "Bit  4: Reserved"),
+    (3,  "Bit  3: Reserved"),
+    (2,  "Bit  2: Reserved"),
+    (1,  "Bit  1: Reserved"),
+    (0,  "Bit  0: Reserved"),
 ]
 
 # Ensure GCC is used
@@ -899,18 +1331,21 @@ def main():
         click.echo("Copyright (c) 2024 RoyalGraphX")
         click.echo(f"Python {get_system_architecture()} Pre-Release {CI_vers} for {host_os_pretty()}\n")
         click.echo("What would you like to do?")
-        click.echo("1. Inspect a Leaf and Subleaf")
-        click.echo("2. Inspect a Register or 32 Bit Value")
-        click.echo("3. Inspect a Register based Leaf")
-        click.echo("4. Inspect a 32 Bit based Leaf")
-        click.echo("5. Dump CPU Registers")
-        click.echo("6. Dump CPU Leafs in Bits")
-        click.echo("7. Dump CPU Register Table")
-        click.echo("8. Dump CPU Leafs in ASCII")
-        click.echo("9. Dump Intel Leaf 1 Information")
+        click.echo(" 1. Inspect a Leaf and Subleaf")
+        click.echo(" 2. Inspect a Register or 32 Bit Value")
+        click.echo(" 3. Inspect a Register based Leaf")
+        click.echo(" 4. Inspect a 32 Bit based Leaf")
+        click.echo(" 5. Dump CPU Registers")
+        click.echo(" 6. Dump CPU Leafs in Bits")
+        click.echo(" 7. Dump CPU Register Table")
+        click.echo(" 8. Dump CPU Leafs in ASCII")
+        click.echo(" 9. Dump Intel Leaf 1 Information")
         click.echo("10. Dump Intel Leaf 7 Information")
-        click.echo("11. Dump AMD Leaf 80000001 Information")
-        click.echo("12. Exit")
+        click.echo("11. Dump Intel Leaf 80000001 Information")
+        click.echo("12. Dump AMD Leaf 1 Information")
+        click.echo("13. Dump AMD Leaf 7 Information")
+        click.echo("14. Dump AMD Leaf 80000001 Information")
+        click.echo("15. Exit")
 
         choice = click.prompt("Enter your choice", type=int)
 
@@ -935,8 +1370,14 @@ def main():
         elif choice == 10:
             inspect_leaf7_intel_support()
         elif choice == 11:
-            inspect_leaf80000001_amd_support()
+            inspect_leaf80000001_intel_support()
         elif choice == 12:
+            inspect_leaf1_amd_support()
+        elif choice == 13:
+            inspect_leaf7_amd_support()
+        elif choice == 14:
+            inspect_leaf80000001_amd_support()
+        elif choice == 15:
             exit_program()
         else:
             click.echo("Invalid choice. Please enter a valid option.")
@@ -1389,7 +1830,7 @@ def inspect_leaf1_intel_support():
     if DEBUG.upper() == "TRUE":
         click.echo("If you see this message, you're in DEBUG mode...")
 
-    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+    compile_and_load_cpuid()
 
     # Query CPUID leaf 1, subleaf 0
     eax, ebx, ecx, edx = call_cpuid(1, 0)
@@ -1406,11 +1847,31 @@ def inspect_leaf1_intel_support():
         click.echo(f"EDX: 0x{edx:08X}\n")
 
     # Convert ECX and EDX to binary strings
+    ebx_binary = f"{ebx:032b}"
     ecx_binary = f"{ecx:032b}"
     edx_binary = f"{edx:032b}"
 
+    colored_ebx_bits = color_bits(ebx_binary)
     colored_ecx_bits = color_bits(ecx_binary)
     colored_edx_bits = color_bits(edx_binary)
+
+# Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        print()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 1, Sub-leaf 0 EBX Bits:")
+    for bit_index, description in intel_leaf1_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
     
     # Print ECX in binary format
     if DEBUG.upper() == "TRUE":
@@ -1420,7 +1881,7 @@ def inspect_leaf1_intel_support():
 
     # Step through each bit in ecx_binary and list its meaning
     click.echo("Intel CPUID Leaf 1, Sub-leaf 0 ECX Bits:")
-    for bit_index, description in intel_leaf1__ecx_bits:
+    for bit_index, description in intel_leaf1_ecx_bits:
         bit_value = ecx_binary[31 - bit_index]
         colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
         colored_desc = colored_description(description, bit_value)
@@ -1438,7 +1899,7 @@ def inspect_leaf1_intel_support():
 
     # Step through each bit in edx_binary and list its meaning
     click.echo("Intel CPUID Leaf 1, Sub-leaf 0 EDX Bits:")
-    for bit_index, description in intel_leaf1__edx_bits:
+    for bit_index, description in intel_leaf1_edx_bits:
         bit_value = edx_binary[31 - bit_index]
         colored_value = colored_binary_value(edx_binary, 31 - bit_index)
         colored_desc = colored_description(description, bit_value)
@@ -1470,7 +1931,7 @@ def inspect_leaf7_intel_support():
     if DEBUG.upper() == "TRUE":
         click.echo("If you see this message, you're in DEBUG mode...")
 
-    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+    compile_and_load_cpuid()
 
     # Query CPUID leaf 7, subleaf 0
     eax, ebx, ecx, edx = call_cpuid(7, 0)
@@ -1549,6 +2010,303 @@ def inspect_leaf7_intel_support():
 
     click.echo()  # Add a newline for cleaner output
 
+def inspect_leaf80000001_intel_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    # Query CPUID leaf 0x80000001, subleaf H
+    eax, ebx, ecx, edx = call_cpuid(0x80000001, 17)
+    if DEBUG.upper() == "TRUE":
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print EBX in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 0x80000001 sub-leaf H Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert EBX to binary string
+    ebx_binary = f"{ebx:032b}"
+    ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
+
+    colored_ebx_bits = color_bits(ebx_binary)
+    colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
+    
+    # Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        print()
+
+    # Step through each bit in ebx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 0x80000001, Sub-leaf H EBX Bits:")
+    for bit_index, description in intel_leaf80000001_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        print()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 0x80000001, Sub-leaf H ECX Bits:")
+    for bit_index, description in intel_leaf80000001_ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        print()
+
+    # Step through each bit in edx_binary and list its meaning
+    click.echo("Intel CPUID Leaf 0x80000001, Sub-leaf H EDX Bits:")
+    for bit_index, description in intel_leaf80000001_edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        #click.echo(f"Value: {colored_value} - {description}")
+        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+def inspect_leaf1_amd_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    # Query CPUID leaf 1, subleaf 0
+    eax, ebx, ecx, edx = call_cpuid(1, 0)
+    if DEBUG.upper() == "TRUE":
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print Registers in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 1 sub-leaf 0 Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert Registers to binary strings
+    ebx_binary = f"{ebx:032b}"
+    ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
+
+    colored_ebx_bits = color_bits(ebx_binary)
+    colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
+    
+    # Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        click.echo()
+
+    # Step through each bit in ebx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 1, Sub-leaf 0 EBX Bits:")
+    for bit_index, description in amd_leaf1_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        click.echo()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 1, Sub-leaf 0 ECX Bits:")
+    for bit_index, description in amd_leaf1_ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        click.echo()
+
+    # Step through each bit in edx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 1, Sub-leaf 0 EDX Bits:")
+    for bit_index, description in amd_leaf1_edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+def inspect_leaf7_amd_support():
+    click.clear()
+
+    def color_bits(binary_string):
+        """Returns a colored version of the binary string with specific bits highlighted."""
+        colored_bits = ""
+        for i, bit in enumerate(binary_string):
+            # Highlight specific bit in red if it's '0', green if it's '1'
+            if bit == '0':
+                colored_bits += click.style(bit, fg='red')
+            else:
+                colored_bits += click.style(bit, fg='green', bold=True)
+        return colored_bits
+
+    def colored_description(description, bit_value):
+        """Returns a colored version of the description based on the bit value."""
+        if bit_value == '0':
+            return click.style(description, fg='red')
+        else:
+            return click.style(description, fg='green', bold=True)
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    # Query CPUID leaf 7, subleaf 0
+    eax, ebx, ecx, edx = call_cpuid(7, 0)
+    if DEBUG.upper() == "TRUE":
+        print("call_cpuid function returned:")
+        print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
+
+    # Print Registers in hexadecimal format
+    if DEBUG.upper() == "TRUE":
+        click.echo("Leaf 7 sub-leaf 0 Registers:")
+        click.echo(f"EAX: 0x{eax:08X}")
+        click.echo(f"EBX: 0x{ebx:08X}")
+        click.echo(f"ECX: 0x{ecx:08X}")
+        click.echo(f"EDX: 0x{edx:08X}\n")
+
+    # Convert Registers to binary strings
+    ebx_binary = f"{ebx:032b}"
+    ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
+
+    colored_ebx_bits = color_bits(ebx_binary)
+    colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
+    
+    # Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        click.echo()
+
+    # Step through each bit in ebx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 7, Sub-leaf 0 EBX Bits:")
+    for bit_index, description in amd_leaf7_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print ECX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("ECX in binary:")
+        print(colored_ecx_bits)
+        click.echo()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 7, Sub-leaf 0 ECX Bits:")
+    for bit_index, description in amd_leaf7_ecx_bits:
+        bit_value = ecx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        click.echo()
+
+    # Step through each bit in edx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 7, Sub-leaf 0 EDX Bits:")
+    for bit_index, description in amd_leaf7_edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
 def inspect_leaf80000001_amd_support():
     click.clear()
 
@@ -1573,7 +2331,7 @@ def inspect_leaf80000001_amd_support():
     if DEBUG.upper() == "TRUE":
         click.echo("If you see this message, you're in DEBUG mode...")
 
-    compile_and_load_cpuid()  # Assuming this function compiles and loads CPUID functionality
+    compile_and_load_cpuid()
 
     # Query CPUID leaf 0x80000001, subleaf H
     eax, ebx, ecx, edx = call_cpuid(0x80000001, 17)
@@ -1581,7 +2339,7 @@ def inspect_leaf80000001_amd_support():
         print("call_cpuid function returned:")
         print(f"EAX: {eax}, EBX: {ebx}, ECX: {ecx}, EDX: {edx}\n")
 
-    # Print ECX in hexadecimal format
+    # Print Registers in hexadecimal format
     if DEBUG.upper() == "TRUE":
         click.echo("Leaf 0x80000001 sub-leaf H Registers:")
         click.echo(f"EAX: 0x{eax:08X}")
@@ -1589,10 +2347,30 @@ def inspect_leaf80000001_amd_support():
         click.echo(f"ECX: 0x{ecx:08X}")
         click.echo(f"EDX: 0x{edx:08X}\n")
 
-    # Convert ECX to binary string
+    # Convert Registers to binary strings
+    ebx_binary = f"{ebx:032b}"
     ecx_binary = f"{ecx:032b}"
+    edx_binary = f"{edx:032b}"
 
+    colored_ebx_bits = color_bits(ebx_binary)
     colored_ecx_bits = color_bits(ecx_binary)
+    colored_edx_bits = color_bits(edx_binary)
+
+    # Print EBX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EBX in binary:")
+        print(colored_ebx_bits)
+        click.echo()
+
+    # Step through each bit in ebx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 0x80000001, Sub-leaf H EBX Bits:")
+    for bit_index, description in amd_leaf80000001_ebx_bits:
+        bit_value = ebx_binary[31 - bit_index]
+        colored_value = colored_binary_value(ebx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
     
     # Print ECX in binary format
     if DEBUG.upper() == "TRUE":
@@ -1606,8 +2384,22 @@ def inspect_leaf80000001_amd_support():
         bit_value = ecx_binary[31 - bit_index]
         colored_value = colored_binary_value(ecx_binary, 31 - bit_index)
         colored_desc = colored_description(description, bit_value)
-        #click.echo(f"Value: {colored_value} - {description}")
-        #click.echo(f"Bit {bit_index}: {description} - Value: {colored_value}")
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    click.echo()  # Add a newline for cleaner output
+
+    # Print EDX in binary format
+    if DEBUG.upper() == "TRUE":
+        click.echo("EDX in binary:")
+        print(colored_edx_bits)
+        click.echo()
+
+    # Step through each bit in ecx_binary and list its meaning
+    click.echo("AMD CPUID Leaf 0x80000001, Sub-leaf H EDX Bits:")
+    for bit_index, description in amd_leaf80000001_edx_bits:
+        bit_value = edx_binary[31 - bit_index]
+        colored_value = colored_binary_value(edx_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
         click.echo(f"{colored_value} - {colored_desc}")
 
     click.echo()  # Add a newline for cleaner output
