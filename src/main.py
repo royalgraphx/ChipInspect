@@ -22,7 +22,7 @@ from cffi import FFI
 
 # Define various variables
 DEBUG = "FALSE"
-CI_vers = "0.0.21"
+CI_vers = "0.0.23"
 ffi = FFI()
 
 # Define the list of leaf values with comments explaining their purpose
@@ -1106,6 +1106,20 @@ def process_leaves_bits():
                 print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - ECX: {print_bits(ecx, 32)}")
                 print(f"Leaf 0x{leaf:08X}, Subleaf {print_subleaf(subleaf)} - {click.style('EDX', bold=True, fg='yellow')}: {print_bits(edx, 32)}")
 
+def process_leaves_bits_vmware():
+    for leaf in leaf_list:
+        max_subleaf = probe_max_subleaf(leaf)
+        for subleaf in range(max_subleaf + 1):
+            eax, ebx, ecx, edx = call_cpuid(leaf, subleaf)
+            
+            # We only print if subleaf is 0
+            if subleaf == 0:
+                # Print each register's bits in the VMware format
+                print(f'cpuid.{leaf:08X}.eax = "{print_bits(eax, 32)}"')
+                print(f'cpuid.{leaf:08X}.ebx = "{print_bits(ebx, 32)}"')
+                print(f'cpuid.{leaf:08X}.ecx = "{print_bits(ecx, 32)}"')
+                print(f'cpuid.{leaf:08X}.edx = "{print_bits(edx, 32)}"')
+
 def process_leaves_ascii():
     for leaf in leaf_list:
         max_subleaf = probe_max_subleaf(leaf)
@@ -1339,13 +1353,14 @@ def main():
         click.echo(" 6. Dump CPU Leafs in Bits")
         click.echo(" 7. Dump CPU Register Table")
         click.echo(" 8. Dump CPU Leafs in ASCII")
-        click.echo(" 9. Dump Intel Leaf 1 Information")
-        click.echo("10. Dump Intel Leaf 7 Information")
-        click.echo("11. Dump Intel Leaf 80000001 Information")
-        click.echo("12. Dump AMD Leaf 1 Information")
-        click.echo("13. Dump AMD Leaf 7 Information")
-        click.echo("14. Dump AMD Leaf 80000001 Information")
-        click.echo("15. Exit")
+        click.echo(" 9. Dump CPU Bits in VMWare format")
+        click.echo("10. Dump Intel Leaf 1 Information")
+        click.echo("11. Dump Intel Leaf 7 Information")
+        click.echo("12. Dump Intel Leaf 80000001 Information")
+        click.echo("13. Dump AMD Leaf 1 Information")
+        click.echo("14. Dump AMD Leaf 7 Information")
+        click.echo("15. Dump AMD Leaf 80000001 Information")
+        click.echo("16. Exit")
 
         choice = click.prompt("Enter your choice", type=int)
 
@@ -1366,18 +1381,20 @@ def main():
         elif choice == 8:
             dump_cpu_ascii()
         elif choice == 9:
-            inspect_leaf1_intel_support()
+            dumpcpuid_vmware_format()
         elif choice == 10:
-            inspect_leaf7_intel_support()
+            inspect_leaf1_intel_support()
         elif choice == 11:
-            inspect_leaf80000001_intel_support()
+            inspect_leaf7_intel_support()
         elif choice == 12:
-            inspect_leaf1_amd_support()
+            inspect_leaf80000001_intel_support()
         elif choice == 13:
-            inspect_leaf7_amd_support()
+            inspect_leaf1_amd_support()
         elif choice == 14:
-            inspect_leaf80000001_amd_support()
+            inspect_leaf7_amd_support()
         elif choice == 15:
+            inspect_leaf80000001_amd_support()
+        elif choice == 16:
             exit_program()
         else:
             click.echo("Invalid choice. Please enter a valid option.")
@@ -2403,6 +2420,16 @@ def inspect_leaf80000001_amd_support():
         click.echo(f"{colored_value} - {colored_desc}")
 
     click.echo()  # Add a newline for cleaner output
+
+def dumpcpuid_vmware_format():
+    click.clear()
+
+    if DEBUG.upper() == "TRUE":
+        click.echo("If you see this message, you're in DEBUG mode...")
+
+    compile_and_load_cpuid()
+
+    process_leaves_bits_vmware()
 
 def exit_program():
     click.echo("Exiting ChipInspect. Goodbye!")
