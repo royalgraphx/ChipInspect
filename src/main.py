@@ -19,10 +19,11 @@ import getpass
 import platform
 import subprocess
 from cffi import FFI
+from itertools import permutations
 
 # Define various variables
 DEBUG = "FALSE"
-CI_vers = "0.0.23"
+CI_vers = "0.0.25"
 ffi = FFI()
 
 # Define the list of leaf values with comments explaining their purpose
@@ -209,6 +210,41 @@ ryzen_leaf_list = [
     0x80000008,  # Virtual and Physical Address Sizes
     0x80000009,  # SVM Revision and Feature Identifiers (AMD-specific)
     0x8000000A,  # SVM Features (AMD-specific)
+]
+# List defining each bit in EAX register from CPUID leaf 1 for Intel platforms
+intel_leaf1_eax_bits = [
+    (31, "Bit 31: Reserved"),
+    (30, "Bit 30: Reserved"),
+    (29, "Bit 29: Reserved"),
+    (28, "Bit 28: Reserved"),
+    (27, "Bit 27: Extended family ID"),
+    (26, "Bit 26: Extended family ID"),
+    (25, "Bit 25: Extended family ID"),
+    (24, "Bit 24: Extended family ID"),
+    (23, "Bit 23: Extended family ID"),
+    (22, "Bit 22: Extended family ID"),
+    (21, "Bit 21: Extended family ID"),
+    (20, "Bit 20: Extended family ID"),
+    (19, "Bit 19: Extended model ID"),
+    (18, "Bit 18: Extended model ID"),
+    (17, "Bit 17: Extended model ID"),
+    (16, "Bit 16: Extended model ID"),
+    (15, "Bit 15: Reserved"),
+    (14, "Bit 14: Reserved"),
+    (13, "Bit 13: Processor type (0 for Original OEM Processor)"),
+    (12, "Bit 12: Processor type (0 for Original OEM Processor)"),
+    (11, "Bit 11: Family ID"),
+    (10, "Bit 10: Family ID"),
+    (9,  "Bit 9: Family ID"),
+    (8,  "Bit 8: Family ID"),
+    (7,  "Bit 7: Model ID"),
+    (6,  "Bit 6: Model ID"),
+    (5,  "Bit 5: Model ID"),
+    (4,  "Bit 4: Model ID"),
+    (3,  "Bit 3: Stepping ID"),
+    (2,  "Bit 2: Stepping ID"),
+    (1,  "Bit 1: Stepping ID"),
+    (0,  "Bit 0: Stepping ID"),
 ]
 
 # List defining each bit in EBX register from CPUID leaf 1 for Intel platforms
@@ -1472,6 +1508,27 @@ def inspect_leaf_subleaf():
     click.echo(f"EDX: {bit_edx}")
     click.echo()
 
+    # Format each register as a 16-byte Cpuid1Data style string
+    # Yes this is a def randomly in the middle of this func
+    # I needed spacing for each value pair lol
+    def occpuid_data_format(reg):
+        # Convert register to 4-byte (32-bit) integer parts in little-endian order
+        byte_str = ' '.join(f"{(reg >> (i * 8)) & 0xFF:02X}" for i in range(4))
+        return byte_str + " " + "00 " * 12
+
+    occpuid_data_eax = occpuid_data_format(eax)
+    occpuid_data_ebx = occpuid_data_format(ebx)
+    occpuid_data_ecx = occpuid_data_format(ecx)
+    occpuid_data_edx = occpuid_data_format(edx)
+
+    # Print Cpuid1Data formatted values
+    click.echo("OpenCore CPUID Data Style Format:")
+    click.echo(f"EAX: {occpuid_data_eax}")
+    click.echo(f"EBX: {occpuid_data_ebx}")
+    click.echo(f"ECX: {occpuid_data_ecx}")
+    click.echo(f"EDX: {occpuid_data_edx}")
+    click.echo()
+
     # Convert to 4-character strings using binary_to_char
     char_eax = binary_to_char(eax)
     char_ebx = binary_to_char(ebx)
@@ -1487,13 +1544,13 @@ def inspect_leaf_subleaf():
     click.echo()
 
     if DEBUG.upper() == "TRUE":
-        # Build and print possible decoded strings
-        decoded_string_1 = char_eax + char_ebx + char_ecx + char_edx
-        decoded_string_2 = char_ebx + char_edx + char_ecx + char_eax
-
+        # Generate all possible decoded strings from permutations of EAX, EBX, ECX, and EDX character parts
         click.echo("Possible Decoded Strings:\n")
-        click.echo(f"{decoded_string_1}")
-        click.echo(f"{decoded_string_2}")
+        
+        for perm in set(permutations([char_eax, char_ebx, char_ecx, char_edx])):
+            decoded_string = ''.join(perm)
+            click.echo(decoded_string)
+            
         click.echo()
 
 def inspect_reg_bit_data():
@@ -1864,13 +1921,78 @@ def inspect_leaf1_intel_support():
         click.echo(f"EDX: 0x{edx:08X}\n")
 
     # Convert ECX and EDX to binary strings
+    eax_binary = f"{eax:032b}"
     ebx_binary = f"{ebx:032b}"
     ecx_binary = f"{ecx:032b}"
     edx_binary = f"{edx:032b}"
 
+    colored_eax_bits = color_bits(eax_binary)
     colored_ebx_bits = color_bits(ebx_binary)
     colored_ecx_bits = color_bits(ecx_binary)
     colored_edx_bits = color_bits(edx_binary)
+
+    # Print EAX in binary format and parse it
+    colored_eax_bits = color_bits(eax_binary)
+    if DEBUG.upper() == "TRUE":
+        click.echo("EAX in binary:")
+        print(colored_eax_bits)
+        print()
+
+    # Step through each bit in eax_binary and list its meaning
+    click.echo("Intel CPUID Leaf 1, Sub-leaf 0 EAX Bits:")
+    for bit_index, description in intel_leaf1_eax_bits:
+        bit_value = eax_binary[31 - bit_index]
+        colored_value = colored_binary_value(eax_binary, 31 - bit_index)
+        colored_desc = colored_description(description, bit_value)
+        click.echo(f"{colored_value} - {colored_desc}")
+
+    # Bit Breakdown for Leaf 1 EAX Data
+    click.echo("\nIntel CPUID Leaf 1, Sub-leaf 0 EAX Breakdown:")
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Field", "Bit Position", "Value", "Hex"))
+    click.echo("-" * 55)  # Separator line
+
+    # Extract each field's value and its corresponding hex
+    stepping_id = eax_binary[28:32]
+    model_number = eax_binary[24:28]
+    family_id = eax_binary[20:24]
+    processor_type = eax_binary[18:20]
+    reserved_secondary = eax_binary[16:18]
+    extended_model_id = eax_binary[12:16]
+    extended_family_id = eax_binary[4:12]
+    reserved = eax_binary[0:4]
+
+    # Display each field's breakdown
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Stepping ID", "0-3", f"{int(stepping_id, 2):04b}", f"{int(stepping_id, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Model Number", "4-7", f"{int(model_number, 2):04b}", f"{int(model_number, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Family ID", "8-11", f"{int(family_id, 2):04b}", f"{int(family_id, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Processor Type", "12-13", f"{int(processor_type, 2):02b}", f"{int(processor_type, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Reserved", "14-15", f"{int(reserved_secondary, 2):02b}", f"{int(reserved_secondary, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Extended Model ID", "16-19", f"{int(extended_model_id, 2):04b}", f"{int(extended_model_id, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Extended Family ID", "20-27", f"{int(extended_family_id, 2):08b}", f"{int(extended_family_id, 2):X}"))
+    click.echo("{:<20} {:<15} {:<10} {:<5}".format("Reserved", "28-31", f"{int(reserved, 2):04b}", f"{int(reserved, 2):X}"))
+
+    # Function to highlight the bits in green for visualization
+    def highlight_bits(eax_binary, start, end):
+        return (
+            eax_binary[:start] + 
+            click.style(eax_binary[start:end], fg='green') + 
+            eax_binary[end:]
+        )
+
+    # New section for debugging visualization
+    if DEBUG.upper() == "TRUE":
+        click.echo()
+        click.echo("Bit Range:")
+        click.echo(highlight_bits(eax_binary, 28, 32))  # Stepping ID
+        click.echo(highlight_bits(eax_binary, 24, 28))  # Model Number
+        click.echo(highlight_bits(eax_binary, 20, 24))  # Family ID
+        click.echo(highlight_bits(eax_binary, 18, 20))  # Processor Type
+        click.echo(highlight_bits(eax_binary, 16, 18))  # Reserved Secondary
+        click.echo(highlight_bits(eax_binary, 12, 16))  # Extended Model ID
+        click.echo(highlight_bits(eax_binary, 4, 12))   # Extended Family ID
+        click.echo(highlight_bits(eax_binary, 0, 4))    # Reserved
+
+    click.echo()  # Add a newline for cleaner output
 
 # Print EBX in binary format
     if DEBUG.upper() == "TRUE":
