@@ -1,4 +1,4 @@
 click
 cffi
 setuptools
-itertools
+more-itertools
